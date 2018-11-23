@@ -1,5 +1,5 @@
 """
-here will be natasha named entity recognising
+here will be natasha named entity recognizing
 """
 from extract_text import PlainText
 
