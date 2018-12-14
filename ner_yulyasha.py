@@ -37,6 +37,7 @@ SUMM = rule(
         )
 )
 
+
 MY_MONEY = rule(
     SUMM,
     money.MONEY,
@@ -58,10 +59,10 @@ text = p.extract_doc_text('0cd32161147aea247b0124e69335c.xml').decode('utf-8')
 
 extractor = MyMoneyExtractor()
 matches = extractor(text)
-for match in matches:
-    print(match.span, match.fact)
-
-for match in parser.findall(text):
-    print([_.value for _ in match.tokens])
+# for match in matches:
+#     print(match.span, match.fact)
+#
+# for match in parser.findall(text):
+#     print([_.value for _ in match.tokens])
 
 

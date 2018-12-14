@@ -24,7 +24,7 @@ class PlainText:
 
     def init_maps(self):
         """
-        Save to map xml file and its doc/docx file. Extension will be defined while saving.
+        Save to map names of xml file and its doc/docx file. Extension will be defined while saving.
         """
 
         files = os.listdir(self.sub_dir)
