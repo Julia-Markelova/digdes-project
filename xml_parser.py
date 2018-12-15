@@ -1,5 +1,4 @@
 import xml.etree.cElementTree as eT
-# tag_name shortName inn kpp postalAddress money
 from enum import Enum
 
 
@@ -9,6 +8,7 @@ class TagNames(Enum):
     KPP = 'kpp'
     ADDRESS = 'postalAddress'
     MONEY = 'initialSum'
+    PARTNER = 'supplierInfo'
 
 
 class ExtractXML:
@@ -21,30 +21,37 @@ class ExtractXML:
             tree = eT.ElementTree(file=self.filename)
             root = tree.getroot()
 
-            body = '{http://zakupki.gov.ru/223fz/purchase/1}body'
-            body2 = '{http://zakupki.gov.ru/223fz/purchasePlan/1}body'
             money11 = 'initialSum'
             money22 = 'sum'
             money33 = 'ContractPrice'
-            address = '{http://zakupki.gov.ru/223fz/types/1}postalAddress'
-            short_name = '{http://zakupki.gov.ru/223fz/types/1}shortName'
+            address = 'postalAddress'
+            short_name = 'shortName'
+            partner = 'supplierInfo'
 
             i = False
-            for t in root.findall('./' + body + '//'):
-                # print(t.tag, t.text)
-                if money11 in t.tag or money22 in t.tag or money33 in t.tag:
-                    i = True
+            for child in root:
+                if 'body' in child.tag:
+                    body = child.tag
 
-            if not i:
-                for t in root.findall('./' + body2 + '//'):
-                    # print(t.tag, t.text)
-                    if money11 in t.tag or money22 in t.tag or money33 in t.tag:
-                        i = True
-            if not i:
-                print("filename: " + self.filename)
-                # print(root.findall('.//'))
-                print("-----------------------------NO-----------------------------------")
+                    for t in root.findall('./' + body + '//'):
+                        # print(t.tag, t.text)
+                        if tag_name == TagNames.MONEY:
+                            if money11 in t.tag or money22 in t.tag or money33 in t.tag:
+                                i = True
+                        elif tag_name == TagNames.ORGANISATION:
+                            if short_name in t.tag:
+                                i = True
+                        elif tag_name == TagNames.ADDRESS:
+                            if address in t.tag:
+                                i = True
+                        elif tag_name == TagNames.PARTNER:
+                            if partner in t.tag:
+                                i = True
+
+                    if not i:
+                        print("filename: " + self.filename)
+                        # print(root.findall('.//'))
+                        print("-----------------------------NO-------"+tag_name.value+"----------------------")
 
         except IOError as e:
             print('\nERROR - cant find file: %s\n' % e)
-
