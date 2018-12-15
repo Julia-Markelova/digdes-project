@@ -49,9 +49,10 @@ class ExtractXML:
                                 i = True
 
                     if not i:
-                        print("filename: " + self.filename)
+                        pass
+                        # print("filename: " + self.filename)
                         # print(root.findall('.//'))
-                        print("-----------------------------NO-------"+tag_name.value+"----------------------")
+                        # print("-----------------------------NO-------"+tag_name.value+"----------------------")
 
         except IOError as e:
             print('\nERROR - cant find file: %s\n' % e)
