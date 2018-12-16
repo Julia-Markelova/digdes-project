@@ -5,7 +5,7 @@ from extract_text import PlainText
 from xml_parser import ExtractXML, TagNames
 from doc_info import *
 import datetime
-import pymorphy2
+
 import os
 from natasha import (
     NamesExtractor,
@@ -14,9 +14,6 @@ from natasha import (
     OrganisationExtractor,
     MoneyExtractor,
 )
-
-
-morph = pymorphy2.MorphAnalyzer()
 
 
 directory = '/home/yulia/Рабочий стол/digdes/Uploads'
@@ -84,15 +81,16 @@ for files in os.listdir(directory):
 
         for match in matches:
             company = CompanyInfo(match.fact.name)
-            # doc.companies.add(morph.parse(match.fact.name)[0])
+            doc.companies.add(company.company)
             organization = True
         if not organization:
             empty_org_counter += 1
 
         docs.append(doc)
 
-        if file_counter > 10:
+        if file_counter > 4:
             break
+
     break
 
 print("summ: {0}, empty_org: {1}, "

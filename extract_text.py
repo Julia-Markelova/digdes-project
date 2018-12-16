@@ -23,7 +23,6 @@ class PlainText:
         """
         Save to map names of xml file and its doc/docx file. Extension will be defined while saving.
         """
-
         files = os.listdir(self.sub_dir)
         for file in files:
             if re.search(".docx?$", file):
