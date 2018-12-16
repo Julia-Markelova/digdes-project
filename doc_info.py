@@ -1,3 +1,6 @@
+"""
+file with main named entities
+"""
 import pymorphy2
 
 morph = pymorphy2.MorphAnalyzer()
@@ -21,37 +24,45 @@ class CompanyInfo:
 
         :param company: string name
         """
-        self.company = self.normal_form(company)
+        self.company = abbreviation(normal_form(company))
         self.address = None
         self.person = None
-        self.abbreviation()
         self.replace_quotes()
-
-    def normal_form(self, string):
-        company_arr = string.split(" ")
-        for c in range(len(company_arr)):
-            company_arr[c] = company_arr[c].lower()
-            if morph.parse(company_arr[c])[0].tag.case == 'nomn':
-                continue
-            company_arr[c] = morph.parse(company_arr[c])[0].normal_form
-        return " ".join(company_arr)
-
-    def abbreviation(self):
-        if 'общество с ограниченный ответственность' in self.company:
-            self.company = self.company.replace('общество с ограниченный ответственность', 'ооо')
-        elif 'открытое акционерное общество' in self.company:
-            self.company = self.company.replace('открытое акционерное общество', 'оао')
-        elif 'акционерное общество' in self.company:
-            self.company = self.company.replace('акционерное общество', 'ао')
-        elif 'закрытое акционерное общество' in self.company:
-            self.company = self.company.replace('закрытое акционерное общество', 'зао')
-        elif 'акционерный общество' in self.company:
-            self.company = self.company.replace('акционерный общество', 'ао')
 
     def replace_quotes(self):
         if '»' in self.company or '«' in self.company:
             self.company = self.company.replace('»', '"')
             self.company = self.company.replace('«', '"')
+
+
+def normal_form(string):
+    """
+    normalised all words in the given string
+    :param string: string to normalise
+    :return: normalised string
+    """
+    company_arr = string.split(" ")
+    for c in range(len(company_arr)):
+        company_arr[c] = company_arr[c].lower()
+        company_arr[c] = morph.parse(company_arr[c])[0].normal_form
+    return " ".join(company_arr)
+
+
+def abbreviation(string):
+    """
+    convert definitions with their abbreviation
+    :param string: string to replace in
+    :return: converted string
+    """
+    word_abbr = {'общество с ограниченный ответственность': 'ооо',
+                 'открытый акционерный общество': 'oaо',
+                 'акционерный общество': 'ао',
+                 'закрытый акционерный общество': 'зао'}
+    for key in word_abbr.keys():
+        if key in string:
+            return string.replace(key, word_abbr[key])
+    else:
+        return string
 
 
 class MoneyInfo:

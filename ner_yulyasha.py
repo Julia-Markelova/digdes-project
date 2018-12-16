@@ -2,12 +2,31 @@
 For total sum recognizing
 """
 from yargy import Parser, rule, or_
-from yargy.predicates import gram, normalized
+from yargy.predicates import gram, normalized, dictionary
+
 from natasha.grammars import money
 from natasha.extractors import Extractor
+from natasha import MoneyExtractor
+from xml_parser import *
+
+import os
 
 from extract_text import PlainText
 
+
+RUBLES = rule(
+    gram('ADJF').optional().repeatable(),
+    gram('PNCT').optional().repeatable(),
+    dictionary({
+        'сумма',
+        'стоимость',
+        'итог',
+        'итого',
+        'всего'
+    }),
+    gram('VERB').optional().repeatable(),
+    gram('PNCT').optional().repeatable()
+)
 
 SUMM = rule(
         or_(
@@ -27,7 +46,10 @@ SUMM = rule(
             normalized('Общая стоимость'),
             normalized('Стоимость'),
             normalized('Сумма'),
-            normalized('Итоговая сумма')
+            normalized('Итоговая сумма'),
+            normalized('стоимость работ'),
+            normalized('руб'),
+            normalized('рублей')
         ),
         or_(
             gram('NOUN').optional().repeatable(),
@@ -39,8 +61,14 @@ SUMM = rule(
 
 
 MY_MONEY = rule(
-    SUMM,
-    money.MONEY,
+    or_(RUBLES,
+        money.MONEY),
+    or_(RUBLES,
+        money.MONEY,
+        RUBLES),
+    or_(money.MONEY,
+        RUBLES),
+    or_(money.MONEY)
 ).interpretation(money.Money)
 
 
@@ -51,18 +79,26 @@ class MyMoneyExtractor(Extractor):
 
 parser = Parser(MY_MONEY)
 
+directory = '/home/yulia/Рабочий стол/digdes/Uploads/00b'
+p = PlainText(directory)
 
-p = PlainText('/home/yulia/Рабочий стол/digdes/Uploads/000')
-text = p.extract_doc_text('0cd32161147aea247b0124e69335c.xml').decode('utf-8')
+for files in p.xml_docs_map:
 
-# print(text)
+    print(files)
+    text = p.extract_doc_text(files).decode('utf-8')
 
-extractor = MyMoneyExtractor()
-matches = extractor(text)
-# for match in matches:
-#     print(match.span, match.fact)
-#
-# for match in parser.findall(text):
-#     print([_.value for _ in match.tokens])
+    extractor = MyMoneyExtractor()
+    matches = extractor(text)
+    for match in matches:
+        print("matcher: ", match.fact.integer, match.fact.currency)
+
+    extractor = MoneyExtractor()
+    matches = extractor(text)
+    for match in matches:
+        print("natasha: ", match.fact.integer, match.fact.currency)
+
+    # XML stuff
+    xml = ExtractXML(os.path.join(directory, files))
+    xml.get_value(TagNames.MONEY)
 
 

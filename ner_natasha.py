@@ -5,6 +5,7 @@ from extract_text import PlainText
 from xml_parser import ExtractXML, TagNames
 from doc_info import *
 import datetime
+import stats
 
 import os
 from natasha import (
@@ -14,7 +15,6 @@ from natasha import (
     OrganisationExtractor,
     MoneyExtractor,
 )
-
 
 directory = '/home/yulia/Рабочий стол/digdes/Uploads'
 ignore_arr = ['/home/yulia/Рабочий стол/digdes/Uploads/00b/aacda0c43805abdb599b7ce50cb33.xml',
@@ -30,7 +30,7 @@ start = datetime.datetime.now()
 file_counter = 0
 empty_org_counter = 0
 empty_money_counter = 0
-
+empty_union_org_counter = 0
 
 docs = []
 
@@ -47,8 +47,7 @@ for files in os.listdir(directory):
         money = False
         organization = False
 
-        print(file)
-        print(file_counter)
+        print(file_counter, file)
 
         if file in ignore_arr:  # only for organisations -_-
             continue
@@ -65,15 +64,15 @@ for files in os.listdir(directory):
         # xml.get_value(TagNames.ADDRESS)
 
         # MONEY
-        extractor = MoneyExtractor()
-        matches = extractor(text)
-
-        for match in matches:
-            value = MoneyInfo(match.fact.integer, match.fact.currency)
-            doc.money.append(value)
-            money = True
-        if not money:
-            empty_money_counter += 1
+        # extractor = MoneyExtractor()
+        # matches = extractor(text)
+        #
+        # for match in matches:
+        #     value = MoneyInfo(match.fact.integer, match.fact.currency)
+        #     doc.money.append(value)
+        #     money = True
+        # if not money:
+        #     empty_money_counter += 1
 
         # ORGANISATION
         extractor = OrganisationExtractor()
@@ -86,21 +85,44 @@ for files in os.listdir(directory):
         if not organization:
             empty_org_counter += 1
 
+        # ADDRESS
+        # extractor = AddressExtractor()
+        # matches = extractor(text)
+        # spans = [_.span for _ in matches]   # !
+        # address = text[spans[0][0]:spans[0][1]]
+        # print(address)
+
         docs.append(doc)
-
-        if file_counter > 4:
-            break
-
     break
 
-print("summ: {0}, empty_org: {1}, "
-      "empty_money {2}, time {3}".format(file_counter, empty_org_counter,
-                                         empty_money_counter,
-                                         datetime.datetime.now() - start))
+for document in docs:
+    print(document.doc_name)
+    xml = ExtractXML(document.doc_name)
+    xml.get_value(TagNames.ORGANISATION)
+    xml.get_value(TagNames.PARTNER)
 
-for i in docs:
-    print(i.doc_name)
-    for k in i.companies:
+    union = stats.strict_include(xml.tags, document.companies)
+    is_not_empty = bool(union)
+    if is_not_empty:
+        print("union:", union)
+
+    union = stats.include(xml.tags, document.companies)
+    is_not_empty = bool(union)
+    if is_not_empty:
+        print("union: inc!", union)
+    else:
+        empty_union_org_counter += 1
+
+    print(xml.tags)
+    for k in document.companies:
         print("comp: ", k)
-    for k in i.money:
+    for k in document.money:
         print("money: ", k.value)
+
+print("summ: {0}, empty_org: {1}, "
+      "empty_money: {2}, "
+      "not in xml %: {3},\n time: {4}".format(file_counter,
+                                              empty_org_counter,
+                                              empty_money_counter,
+                                              empty_union_org_counter / file_counter,
+                                              datetime.datetime.now() - start))
