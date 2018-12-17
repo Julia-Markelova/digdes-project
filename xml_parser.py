@@ -1,3 +1,4 @@
+import traceback
 import xml.etree.cElementTree as eT
 from enum import Enum
 from doc_info import abbreviation, normal_form
@@ -16,7 +17,8 @@ class ExtractXML:
 
     def __init__(self, filename):
         self.filename = filename
-        self.tags = set()
+        self.org_tags = set()
+        self.money_tags = set()
 
     def get_value(self, tag_name):
         try:
@@ -40,14 +42,22 @@ class ExtractXML:
                         # print(t.tag, t.text)
                         if tag_name == TagNames.MONEY:
                             if money11 in t.tag or money22 in t.tag or money33 in t.tag:
-                                print("xml: ", t.text)
+                                try:
+                                    if ',' in t.text:
+                                        self.money_tags.add(int(t.text.split(',')[0]))
+                                    elif '.' in t.text:
+                                        self.money_tags.add(int(t.text.split('.')[0]))
+                                    else:
+                                        self.money_tags.add(int(t.text))
+                                except ValueError:
+                                    continue
                                 i = True
                         elif tag_name == TagNames.ORGANISATION:
                             if short_name in t.tag:
-                                self.tags.add(abbreviation(normal_form(t.text)))
+                                self.org_tags.add(abbreviation(normal_form(t.text)))
                                 i = True
                             if full_name in t.tag:
-                                self.tags.add(abbreviation(normal_form(t.text)))
+                                self.org_tags.add(abbreviation(normal_form(t.text)))
                                 i = True
                         elif tag_name == TagNames.ADDRESS:
                             if address in t.tag:

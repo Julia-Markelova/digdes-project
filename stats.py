@@ -39,3 +39,13 @@ def include(xml_set, document_set):
             elif xml in doc:
                 included_words_set.add(doc)
     return included_words_set
+
+
+def include_money(xml_set, document_set):
+    """
+    check if values from extractor are equals to xml
+    :param xml_set: set with money (int) from xml-file
+    :param document_set: set with money (int) from extractor
+    :return: intersection of two sets
+    """
+    return xml_set & document_set

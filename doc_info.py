@@ -14,7 +14,7 @@ class DocumentInfo:
         """
         self.doc_name = doc_name
         self.companies = set()
-        self.money = []
+        self.money = set()
 
 
 class CompanyInfo:
