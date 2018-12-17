@@ -1,13 +1,7 @@
 """
-here will be natasha named entity recognizing
+here is natasha named entity recognizing
 """
-from extract_text import PlainText
-from xml_parser import ExtractXML, TagNames
 from doc_info import *
-import datetime
-import stats
-
-import os
 from natasha import (
     NamesExtractor,
     PersonExtractor,
@@ -16,7 +10,6 @@ from natasha import (
     MoneyExtractor,
 )
 
-directory = '/home/yulia/Рабочий стол/digdes/Uploads'
 ignore_arr = ['/home/yulia/Рабочий стол/digdes/Uploads/00b/aacda0c43805abdb599b7ce50cb33.xml',
               '/home/yulia/Рабочий стол/digdes/Uploads/00b/16b76c3f92cbc79b77a66db99f03d.xml',
               '/home/yulia/Рабочий стол/digdes/Uploads/00b/f0ea6af68e668dbfa4198a4363b89.xml',
@@ -25,110 +18,51 @@ ignore_arr = ['/home/yulia/Рабочий стол/digdes/Uploads/00b/aacda0c438
               '/home/yulia/Рабочий стол/digdes/Uploads/00b/65f211db67d202d6d9810b8b501c4.xml',
               '/home/yulia/Рабочий стол/digdes/Uploads/00b/971e630fc295ed8361c99aab7b078.xml',
               '/home/yulia/Рабочий стол/digdes/Uploads/00b/10c7f77e3f5752add9d1b6e3ad729.xml']
-start = datetime.datetime.now()
 
-file_counter = 0
-empty_org_counter = 0
-empty_money_counter = 0
-empty_union_org_counter = 0
-empty_union_money_counter = 0
 
-docs = []
+def extract_organizations(text, file, document_info):
 
-for files in os.listdir(directory):
-    sub_dir = os.path.join(directory, files)
-    # sub_dir = '/home/yulia/Рабочий стол/digdes/Uploads/00b'
-    print("filename: " + sub_dir + "\n")
+    if file in ignore_arr:  # only for organisations -_-
+        return
 
-    p = PlainText(sub_dir)
-
-    for file in p.xml_docs_map:
-
-        # help to count empty matchers
-        money = False
-        organization = False
-
-        print(file_counter, file)
-
-        if file in ignore_arr:  # only for organisations -_-
-            continue
-        file_counter += 1
-        text = p.extract_doc_text(file).decode('utf-8')  # docx format
-
+    if not document_info:
         doc = DocumentInfo(file)
-
-        # MONEY
-        extractor = MoneyExtractor()
-        matches = extractor(text)
-
-        for match in matches:
-            value = MoneyInfo(match.fact.integer, match.fact.currency)
-            doc.money.add(value.value)
-            money = True
-        if not money:
-            empty_money_counter += 1
-
-        # ORGANISATION
-        # extractor = OrganisationExtractor()
-        # matches = extractor(text)
-        #
-        # for match in matches:
-        #     company = CompanyInfo(match.fact.name)
-        #     doc.companies.add(company.company)
-        #     organization = True
-        # if not organization:
-        #     empty_org_counter += 1
-
-        # ADDRESS
-        # extractor = AddressExtractor()
-        # matches = extractor(text)
-        # spans = [_.span for _ in matches]   # !
-        # address = text[spans[0][0]:spans[0][1]]
-        # print(address)
-
-        docs.append(doc)
-
-        if file_counter > 10:
-            break
-    break
-
-for document in docs:
-    print(document.doc_name)
-    xml = ExtractXML(document.doc_name)
-    # xml.get_value(TagNames.ORGANISATION)
-    # xml.get_value(TagNames.PARTNER)
-    xml.get_value(TagNames.MONEY)
-    # union = stats.strict_include(xml.org_tags, document.companies)
-    # is_not_empty = bool(union)
-    # if is_not_empty:
-    #     print("union:", union)
-    #
-    # union = stats.include(xml.org_tags, document.companies)
-    # is_not_empty = bool(union)
-    # if is_not_empty:
-    #     print("union: inc!", union)
-    # else:
-    #     empty_union_org_counter += 1
-
-    union = stats.include_money(xml.money_tags, document.money)
-    is_not_empty = bool(union)
-    if is_not_empty:
-        print("money", union)
     else:
-        empty_union_money_counter += 1
+        doc = document_info
 
-    # print(xml.org_tags)
-    print(xml.money_tags)
+    # ORGANISATION
+    extractor = OrganisationExtractor()
+    matches = extractor(text)
 
-    for k in document.companies:
-        print("comp: ", k)
-    for k in document.money:
-        print("money: ", k)
+    for match in matches:
+        company = CompanyInfo(match.fact.name)
+        doc.companies.add(company.company)
 
-print("summ: {0}, empty_org: {1}, "
-      "empty_money: {2}, "
-      "not in xml %: {3},\n time: {4}".format(file_counter,
-                                              empty_org_counter,
-                                              empty_money_counter,
-                                              empty_union_money_counter,
-                                              datetime.datetime.now() - start))
+    return doc
+
+
+def extract_money(text, file, document_info):
+
+    if not document_info:
+        doc = DocumentInfo(file)
+    else:
+        doc = document_info
+
+    # MONEY
+    extractor = MoneyExtractor()
+    matches = extractor(text)
+
+    for match in matches:
+        value = MoneyInfo(match.fact.integer, match.fact.currency)
+        doc.money.add(value.value)
+
+    return doc
+
+
+def extract_address(text):
+    # ADDRESS
+    extractor = AddressExtractor()
+    matches = extractor(text)
+    spans = [_.span for _ in matches]   # !
+    address = text[spans[0][0]:spans[0][1]]
+    print(address)

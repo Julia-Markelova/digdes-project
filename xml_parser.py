@@ -1,4 +1,3 @@
-import traceback
 import xml.etree.cElementTree as eT
 from enum import Enum
 from doc_info import abbreviation, normal_form
