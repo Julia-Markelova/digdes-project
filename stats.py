@@ -10,8 +10,8 @@ def strict_include(xml_set, document_set):
     :param document_set: set with organisations which are extracted by parser
     :return: intersection of two sets
     """
-    no_space_xml = set(map(lambda org_name: org_name.replace(" ", ""), xml_set))
-    no_space_doc = set(map(lambda org_name: org_name.replace(" ", ""), document_set))
+    no_space_xml = set(map(lambda org_name: org_name.replace("[^a-z]", ""), xml_set))
+    no_space_doc = set(map(lambda org_name: org_name.replace("[^a-z]", ""), document_set))
     return no_space_xml & no_space_doc
 
 
@@ -23,8 +23,8 @@ def include(xml_set, document_set):
     :param document_set: set with organisations which are extracted by parser
     :return: set of founded elements
     """
-    no_space_xml = set(map(lambda org_name: org_name.replace(" ", ""), xml_set))
-    no_space_doc = set(map(lambda org_name: org_name.replace(" ", ""), document_set))
+    no_space_xml = set(map(lambda org_name: org_name.replace("[^a-z]", ""), xml_set))
+    no_space_doc = set(map(lambda org_name: org_name.replace("[^a-z]", ""), document_set))
     included_words_set = set()
 
     ignore_abbr = ['ао', 'оао', 'ооо', 'зао', 'сп', 'дюсш',

@@ -1,5 +1,5 @@
 """
-here is natasha named entity recognizing
+here is natasha named entity recognition
 """
 from doc_info import *
 from natasha import (
@@ -20,17 +20,18 @@ ignore_arr = ['/home/yulia/Рабочий стол/digdes/Uploads/00b/aacda0c438
               '/home/yulia/Рабочий стол/digdes/Uploads/00b/10c7f77e3f5752add9d1b6e3ad729.xml']
 
 
-def extract_organizations(text, file, document_info):
-
+def extract_organizations(text: 'string', file: 'filename', doc: 'DocumentInfo')-> 'DocumentInfo':
+    """
+    extract info about organisations from a given text and save it to a given doc.
+    Check if file is not in ignore list (there files which calls RecursionError)
+    :param text: (string) plain text
+    :param file: (string) full filename
+    :param doc: DocumentInfo obj
+    :return: DocumentInfo obj with a set of organisations
+    """
     if file in ignore_arr:  # only for organisations -_-
         return
 
-    if not document_info:
-        doc = DocumentInfo(file)
-    else:
-        doc = document_info
-
-    # ORGANISATION
     extractor = OrganisationExtractor()
     matches = extractor(text)
 
@@ -41,14 +42,8 @@ def extract_organizations(text, file, document_info):
     return doc
 
 
-def extract_money(text, file, document_info):
+def extract_money(text, doc):
 
-    if not document_info:
-        doc = DocumentInfo(file)
-    else:
-        doc = document_info
-
-    # MONEY
     extractor = MoneyExtractor()
     matches = extractor(text)
 

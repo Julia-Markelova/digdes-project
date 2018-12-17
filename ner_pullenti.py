@@ -1,13 +1,11 @@
-from pullenti_wrapper.processor import (
-    Processor,
-    DATE,
-    GEO,
-    ORGANIZATION,
-    PERSON,
-    MONEY,
-)
+"""
+Pullenti recognition is here
+"""
+from pullenti.ner.SourceOfAnalysis import SourceOfAnalysis
 
-processor = Processor([PERSON, ORGANIZATION, GEO, DATE, MONEY])
-text = '...'
-result = processor(text)
-print(result)
+
+def extract_money(text, processor):
+    result = processor.process(SourceOfAnalysis(text))
+
+    for entity in result.entities:
+        print(entity.value) if entity.type_name == 'MONEY' else ""

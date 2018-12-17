@@ -1,9 +1,14 @@
 import datetime
 import os
 
+from pullenti.ner.ProcessorService import ProcessorService
+from pullenti_wrapper.processor import Processor
+
 import stats
+from doc_info import DocumentInfo
 from extract_text import PlainText
 from ner_natasha import extract_organizations, extract_money
+from ner_pullenti import extract_money
 from xml_parser import ExtractXML, TagNames
 
 directory = '/home/yulia/Рабочий стол/digdes/Uploads'
@@ -25,13 +30,22 @@ for files in os.listdir(directory):
     for file in p.xml_docs_map:
 
         text = p.extract_doc_text(file).decode('utf-8')
-        doc = extract_organizations(text, file, None)
-        doc = extract_money(text, file, doc)
-        docs.append(doc)
+
+        # PULLENTI
+        Processor([])
+        processor = ProcessorService.create_processor()
+        extract_money(text, processor)
+
+        # NATASHA
+        # doc = DocumentInfo(file)
+        # doc = extract_organizations(text, file, doc)
+        # doc = extract_money(text, doc)
+        # docs.append(doc)
 
         print(file_counter, file)
         file_counter += 1
-
+        break
+    break
 
 for document in docs:
     print(document.doc_name)
