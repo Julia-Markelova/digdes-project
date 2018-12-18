@@ -9,6 +9,7 @@ from doc_info import DocumentInfo
 from extract_text import PlainText
 from ner_natasha import extract_organizations, extract_money
 from ner_pullenti import extract_money_org
+from ner_pullenti_wrapper import wrapper_extractor
 from xml_parser import ExtractXML, TagNames
 
 directory = '/home/yulia/Рабочий стол/digdes/Uploads'
@@ -22,48 +23,46 @@ empty_union_money_counter = 0
 start = datetime.datetime.now()
 
 
-def print_info(doc, empty_org_xml_doc, empty_money_xml_doc, empty_org, empty_money, start_time):
-    xml = ExtractXML(doc.doc_name)
+def check_xml_match_and_print(doc_):
+    xml = ExtractXML(doc_.doc_name)
     xml.get_value(TagNames.ORGANISATION)
     xml.get_value(TagNames.PARTNER)
-    xml.get_value(TagNames.MONEY)
-    union = stats.strict_include(xml.org_tags, doc.companies)
-    is_not_empty = bool(union)
-    if is_not_empty:
-        print("union:", union)
-
-    union = stats.include(xml.org_tags, doc.companies)
-    is_not_empty = bool(union)
-    if is_not_empty:
-        print("union: inc!", union)
-    else:
-        empty_org_xml_doc += 1
-
-    union = stats.include_money(xml.money_tags, doc.money)
-    is_not_empty = bool(union)
-    if is_not_empty:
-        print("money", union)
-    else:
-        empty_money_xml_doc += 1
 
     print(xml.org_tags)
+
+    for company in doc_.companies:
+        print("comp: ", company)
+
+    union = stats.strict_include(xml.org_tags, doc_.companies)
+    is_not_empty_ = bool(union)
+    if is_not_empty_:
+        print("union:", union)
+
+    union = stats.include(xml.org_tags, doc_.companies)
+    is_not_empty_ = bool(union)
+    if is_not_empty_:
+        print("union: inc!", union)
+    else:
+        return False
+    return True
+
+
+def print_info_money(doc_):
+    xml = ExtractXML(doc_.doc_name)
+    xml.get_value(TagNames.MONEY)
+
     print(xml.money_tags)
 
-    is_not_empty = bool(doc.companies)
-    if not is_not_empty:
-        empty_org += 1
-    else:
-        for k in doc.companies:
-            print("comp: ", k)
+    for k in doc_.money:
+        print("money: ", k)
 
-    is_not_empty = bool(doc.money)
-    if not is_not_empty:
-        empty_money += 1
+    union = stats.include_money(xml.money_tags, doc_.money)
+    is_not_empty_ = bool(union)
+    if is_not_empty_:
+        print("money", union)
     else:
-        for k in doc.money:
-            print("money: ", k)
-
-    print("time: ", datetime.datetime.now() - start_time)
+        return False
+    return True
 
 
 for files in os.listdir(directory):
@@ -78,14 +77,31 @@ for files in os.listdir(directory):
 
         text = p.extract_doc_text(file).decode('utf-8')
 
-        # PULLENTI
+        # PULLENTI-WRAPPER
         doc = DocumentInfo(file)
-        Processor([])
-        processor = ProcessorService.create_processor()
-        extract_money_org(text, processor, doc)
+        wrapper_extractor(text, doc)
 
-        print_info(doc, empty_union_org_counter, empty_union_money_counter,
-                   empty_org_counter, empty_money_counter, start_time)
+        is_not_empty = bool(doc.companies)
+        if is_not_empty:
+            match = check_xml_match_and_print(doc)
+            if not match:
+                empty_union_org_counter += 1
+        else:
+            empty_org_counter += 1
+
+        is_not_empty = bool(doc.money)
+        if is_not_empty:
+            match = print_info_money(doc)
+            if not match:
+                empty_union_money_counter += 1
+        else:
+            empty_money_counter += 1
+
+        # PULLENTI
+        # doc = DocumentInfo(file)
+        # Processor([])
+        # processor = ProcessorService.create_processor()
+        # extract_money_org(text, processor, doc)
 
         # NATASHA
         # doc = DocumentInfo(file)

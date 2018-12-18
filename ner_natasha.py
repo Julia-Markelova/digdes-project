@@ -36,8 +36,7 @@ def extract_organizations(text: 'string', file: 'filename', doc: 'DocumentInfo')
     matches = extractor(text)
 
     for match in matches:
-        company = CompanyInfo(match.fact.name)
-        doc.companies.add(company.company)
+        doc.companies.add(match.fact.name)
 
     return doc
 
