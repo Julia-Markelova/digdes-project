@@ -78,30 +78,30 @@ for files in os.listdir(directory):
         text = p.extract_doc_text(file).decode('utf-8')
 
         # PULLENTI-WRAPPER
-        doc = DocumentInfo(file)
-        wrapper_extractor(text, doc)
-
-        is_not_empty = bool(doc.companies)
-        if is_not_empty:
-            match = check_xml_match_and_print(doc)
-            if not match:
-                empty_union_org_counter += 1
-        else:
-            empty_org_counter += 1
-
-        is_not_empty = bool(doc.money)
-        if is_not_empty:
-            match = print_info_money(doc)
-            if not match:
-                empty_union_money_counter += 1
-        else:
-            empty_money_counter += 1
+        # doc = DocumentInfo(file)
+        # wrapper_extractor(text, doc)
+        #
+        # is_not_empty = bool(doc.companies)
+        # if is_not_empty:
+        #     match = check_xml_match_and_print(doc)
+        #     if not match:
+        #         empty_union_org_counter += 1
+        # else:
+        #     empty_org_counter += 1
+        #
+        # is_not_empty = bool(doc.money)
+        # if is_not_empty:
+        #     match = print_info_money(doc)
+        #     if not match:
+        #         empty_union_money_counter += 1
+        # else:
+        #     empty_money_counter += 1
 
         # PULLENTI
-        # doc = DocumentInfo(file)
-        # Processor([])
-        # processor = ProcessorService.create_processor()
-        # extract_money_org(text, processor, doc)
+        doc = DocumentInfo(file)
+        Processor([])
+        processor = ProcessorService.create_processor()
+        extract_money_org(text, processor, doc)
 
         # NATASHA
         # doc = DocumentInfo(file)
@@ -113,7 +113,7 @@ for files in os.listdir(directory):
         print(file_counter, file)
         file_counter += 1
 
-        if file_counter > 4:
+        if file_counter > 9:
             break
     break
 
