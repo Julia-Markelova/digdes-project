@@ -53,10 +53,10 @@ class ExtractXML:
                                 i = True
                         elif tag_name == TagNames.ORGANISATION:
                             if short_name in t.tag:
-                                self.org_tags.add(abbreviation(normal_form(t.text)))
+                                self.org_tags.add(t.text)
                                 i = True
                             if full_name in t.tag:
-                                self.org_tags.add(abbreviation(normal_form(t.text)))
+                                self.org_tags.add(t.text)
                                 i = True
                         elif tag_name == TagNames.ADDRESS:
                             if address in t.tag:

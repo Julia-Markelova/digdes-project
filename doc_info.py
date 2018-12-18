@@ -27,12 +27,16 @@ class CompanyInfo:
         self.company = abbreviation(normal_form(company))
         self.address = None
         self.person = None
-        self.replace_quotes()
 
-    def replace_quotes(self):
-        if '»' in self.company or '«' in self.company:
-            self.company = self.company.replace('»', '"')
-            self.company = self.company.replace('«', '"')
+
+def replace_quotes_dashes(string):
+    if '»' in string or '«' or '"' or '\'' or '-' in string:
+        string = string.replace('»', '')
+        string = string.replace('«', '')
+        string = string.replace('"', '')
+        string = string.replace('\'', '')
+        string = string.replace('-', '')
+    return string
 
 
 def normal_form(string):
@@ -41,7 +45,8 @@ def normal_form(string):
     :param string: string to normalise
     :return: normalised string
     """
-    company_arr = string.split(" ")
+    string1 = replace_quotes_dashes(string)
+    company_arr = string1.split(" ")
     for c in range(len(company_arr)):
         company_arr[c] = company_arr[c].lower()
         company_arr[c] = morph.parse(company_arr[c])[0].normal_form

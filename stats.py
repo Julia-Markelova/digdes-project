@@ -1,6 +1,7 @@
 """
 module to save different statistics
 """
+from doc_info import abbreviation, normal_form
 
 
 def strict_include(xml_set, document_set):
@@ -10,8 +11,10 @@ def strict_include(xml_set, document_set):
     :param document_set: set with organisations which are extracted by parser
     :return: intersection of two sets
     """
-    no_space_xml = set(map(lambda org_name: org_name.replace("[^a-z]", ""), xml_set))
-    no_space_doc = set(map(lambda org_name: org_name.replace("[^a-z]", ""), document_set))
+    no_space_xml = set(map(lambda org_name:
+                           abbreviation(normal_form(org_name)).replace(" ", ""), xml_set))
+    no_space_doc = set(map(lambda org_name:
+                           abbreviation(normal_form(org_name)).replace(" ", ""), document_set))
     return no_space_xml & no_space_doc
 
 
@@ -23,13 +26,16 @@ def include(xml_set, document_set):
     :param document_set: set with organisations which are extracted by parser
     :return: set of founded elements
     """
-    no_space_xml = set(map(lambda org_name: org_name.replace("[^a-z]", ""), xml_set))
-    no_space_doc = set(map(lambda org_name: org_name.replace("[^a-z]", ""), document_set))
+    no_space_xml = set(map(lambda org_name:
+                           abbreviation(normal_form(org_name)).replace(" ", ""), xml_set))
+    no_space_doc = set(map(lambda org_name:
+                           abbreviation(normal_form(org_name)).replace(" ", ""), document_set))
     included_words_set = set()
 
     ignore_abbr = ['ао', 'оао', 'ооо', 'зао', 'сп', 'дюсш',
                    'фгб', 'окб', 'аэс', 'кп', 'акб', 'уфмс',
-                   'тгт', 'ук']
+                   'тгт', 'ук', 'спс', 'фгбу', 'с', 'маоу',
+                   'маоудо', 'культура', 'мадоу']
     for doc in no_space_doc:
         if doc in ignore_abbr:
             continue

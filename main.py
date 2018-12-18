@@ -21,7 +21,54 @@ empty_union_money_counter = 0
 
 start = datetime.datetime.now()
 
+
+def print_info(doc, empty_org_xml_doc, empty_money_xml_doc, empty_org, empty_money, start_time):
+    xml = ExtractXML(doc.doc_name)
+    xml.get_value(TagNames.ORGANISATION)
+    xml.get_value(TagNames.PARTNER)
+    xml.get_value(TagNames.MONEY)
+    union = stats.strict_include(xml.org_tags, doc.companies)
+    is_not_empty = bool(union)
+    if is_not_empty:
+        print("union:", union)
+
+    union = stats.include(xml.org_tags, doc.companies)
+    is_not_empty = bool(union)
+    if is_not_empty:
+        print("union: inc!", union)
+    else:
+        empty_org_xml_doc += 1
+
+    union = stats.include_money(xml.money_tags, doc.money)
+    is_not_empty = bool(union)
+    if is_not_empty:
+        print("money", union)
+    else:
+        empty_money_xml_doc += 1
+
+    print(xml.org_tags)
+    print(xml.money_tags)
+
+    is_not_empty = bool(doc.companies)
+    if not is_not_empty:
+        empty_org += 1
+    else:
+        for k in doc.companies:
+            print("comp: ", k)
+
+    is_not_empty = bool(doc.money)
+    if not is_not_empty:
+        empty_money += 1
+    else:
+        for k in doc.money:
+            print("money: ", k)
+
+    print("time: ", datetime.datetime.now() - start_time)
+
+
 for files in os.listdir(directory):
+
+    start_time = datetime.datetime.now()
     sub_dir = os.path.join(directory, files)
     print("filename: " + sub_dir + "\n")
 
@@ -37,6 +84,9 @@ for files in os.listdir(directory):
         processor = ProcessorService.create_processor()
         extract_money_org(text, processor, doc)
 
+        print_info(doc, empty_union_org_counter, empty_union_money_counter,
+                   empty_org_counter, empty_money_counter, start_time)
+
         # NATASHA
         # doc = DocumentInfo(file)
         # doc = extract_organizations(text, file, doc)
@@ -46,46 +96,17 @@ for files in os.listdir(directory):
 
         print(file_counter, file)
         file_counter += 1
-        break
+
+        if file_counter > 4:
+            break
     break
-
-for document in docs:
-    print(document.doc_name)
-    xml = ExtractXML(document.doc_name)
-    xml.get_value(TagNames.ORGANISATION)
-    xml.get_value(TagNames.PARTNER)
-    xml.get_value(TagNames.MONEY)
-    union = stats.strict_include(xml.org_tags, document.companies)
-    is_not_empty = bool(union)
-    if is_not_empty:
-        print("union:", union)
-
-    union = stats.include(xml.org_tags, document.companies)
-    is_not_empty = bool(union)
-    if is_not_empty:
-        print("union: inc!", union)
-    else:
-        empty_union_org_counter += 1
-
-    union = stats.include_money(xml.money_tags, document.money)
-    is_not_empty = bool(union)
-    if is_not_empty:
-        print("money", union)
-    else:
-        empty_union_money_counter += 1
-
-    print(xml.org_tags)
-    print(xml.money_tags)
-
-    for k in document.companies:
-        print("comp: ", k)
-    for k in document.money:
-        print("money: ", k)
 
 print("summ: {0}, empty_org: {1}, "
       "empty_money: {2}, "
-      "not in xml %: {3},\n time: {4}".format(file_counter,
-                                              empty_org_counter,
-                                              empty_money_counter,
-                                              empty_union_money_counter,
-                                              datetime.datetime.now() - start))
+      "not in xml money: {3},\nnot in xml org {4}, "
+      "time: {5}".format(file_counter,
+                         empty_org_counter,
+                         empty_money_counter,
+                         empty_union_money_counter,
+                         empty_union_org_counter,
+                         datetime.datetime.now() - start))
