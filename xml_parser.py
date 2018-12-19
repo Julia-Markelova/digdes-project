@@ -1,14 +1,21 @@
 import xml.etree.cElementTree as eT
-from enum import Enum
+from enum import Enum, auto
 
 
 class TagNames(Enum):
-    ORGANISATION = 'shortName'
-    INN = 'inn'
-    KPP = 'kpp'
-    ADDRESS = 'postalAddress'
-    MONEY = 'initialSum'
-    PARTNER = 'supplierInfo'
+    ORGANISATION = auto()
+    INN = auto()
+    KPP = auto()
+    ADDRESS = auto()
+    MONEY = auto()
+    PARTNER = auto()
+
+
+class ReturnValues(Enum):
+    FOUND = auto()
+    NOT_FOUND = auto()
+    ERROR = auto()
+    XML_NOT_FOUND = auto()
 
 
 class ExtractXML:
@@ -22,9 +29,9 @@ class ExtractXML:
         """
         extract info from xml-file
         :param tag_name: type of value (TagName)
-        :return: true in success, false if no such type of value was founded
+        :return: ReturnValues
         """
-        find = False
+        return_value = ReturnValues.XML_NOT_FOUND
         try:
             tree = eT.ElementTree(file=self.filename)
             root = tree.getroot()
@@ -48,30 +55,30 @@ class ExtractXML:
                                 try:
                                     if ',' in t.text:
                                         self.money_tags.add(int(t.text.split(',')[0]))
-                                    elif '.' in t.text:
+                                    if '.' in t.text:
                                         self.money_tags.add(int(t.text.split('.')[0]))
                                     else:
                                         self.money_tags.add(int(t.text))
                                 except ValueError:
                                     continue
-                                find = True
+                                return_value = ReturnValues.FOUND
                         elif tag_name == TagNames.ORGANISATION:
                             if short_name in t.tag:
                                 self.org_tags.add(t.text)
-                                find = True
+                                return_value = ReturnValues.FOUND
                             if full_name in t.tag:
                                 self.org_tags.add(t.text)
-                                find = True
-                        elif tag_name == TagNames.ADDRESS:
-                            if address in t.tag:
-                                find = True
+                                return_value = ReturnValues.FOUND
                         elif tag_name == TagNames.PARTNER:
                             if partner in t.tag:
                                 self.org_tags.add(t.text)
-                                find = True
+                                return_value = ReturnValues.FOUND
+                        elif tag_name == TagNames.ADDRESS:
+                            if address in t.tag:
+                                return_value = ReturnValues.FOUND
 
         except IOError as e:
             print('\nERROR - cant find file: %s\n' % e)
-            return False
+            return_value = ReturnValues.ERROR
 
-        return find
+        return return_value

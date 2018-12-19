@@ -11,6 +11,13 @@ recall_organization = []
 precision_money = []
 recall_money = []
 
+empty_org_counter = 0
+empty_money_counter = 0
+empty_org_xml = 0
+empty_money_xml = 0
+match_org_xml_counter = 0
+match_money_xml_counter = 0
+
 
 def strict_include(xml_set, document_set):
     """
@@ -65,11 +72,31 @@ def include_money(xml_set, document_set):
     return xml_set & document_set
 
 
+def avg_round_count(list_of_values):
+    """
+    count average value of a list
+    :param list_of_values: list of digits
+    :return: rounded average value
+    """
+    return round(reduce(lambda x, y: x + y, list_of_values) / len(list_of_values), 2)
+
+
 def avg_count(list_of_values):
+    """
+    count average
+    :param list_of_values: list of digits
+    :return: average value
+    """
     return reduce(lambda x, y: x + y, list_of_values) / len(list_of_values)
 
 
 def f_value(precision, recall):
+    """
+    count f-value to show how good Named Entities were extracted
+    :param precision: (right founded answers) / (all founded answers)
+    :param recall: (right founded answers) / (right answers)
+    :return: f-value (in percent)
+    """
     return round(2 * precision * recall / (precision + recall) * 100, 2)
 
 

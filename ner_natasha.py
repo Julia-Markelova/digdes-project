@@ -2,13 +2,8 @@
 here is natasha named entity recognition
 """
 from doc_info import *
-from natasha import (
-    NamesExtractor,
-    PersonExtractor,
-    AddressExtractor,
-    OrganisationExtractor,
-    MoneyExtractor,
-)
+from natasha import AddressExtractor, OrganisationExtractor, MoneyExtractor
+from ner_stuff import Extractor
 
 ignore_arr = ['/home/yulia/Рабочий стол/digdes/Uploads/00b/aacda0c43805abdb599b7ce50cb33.xml',
               '/home/yulia/Рабочий стол/digdes/Uploads/00b/16b76c3f92cbc79b77a66db99f03d.xml',
@@ -100,44 +95,58 @@ ignore_arr = ['/home/yulia/Рабочий стол/digdes/Uploads/00b/aacda0c438
               '/home/yulia/Рабочий стол/digdes/Uploads/00f/60b029d152728f8f515bf3f5eef38.xml']
 
 
+class NatashaExtractor(Extractor):
 
-def extract_organizations(text, file, doc):
-    """
-    extract info about organisations from a given text and save it to a given doc.
-    Check if file is not in ignore list (there files which calls RecursionError)
-    :param text: (string) plain text
-    :param file: (string) full filename
-    :param doc: DocumentInfo obj
-    :return: DocumentInfo obj with a set of organisations
-    """
-    if file in ignore_arr:  # only for organisations -_-
-        return doc
+    def __extract_organizations__(self):
+        """
+        extract info about organisations from a text and save it to a Document.
+        Check if file is not in ignore list (there are files which call RecursionError)
+        :return: Document obj with a set of organisations
+        """
+        if self.file in ignore_arr:  # only for organisations -_-
+            return self.doc
 
-    extractor = OrganisationExtractor()
-    matches = extractor(text)
+        extractor = OrganisationExtractor()
+        matches = extractor(self.text)
 
-    for match in matches:
-        doc.companies.add(match.fact.name)
+        for match in matches:
+            self.doc.companies.add(match.fact.name)
 
-    return doc
+        return self.doc
 
+    def __extract_money__(self):
+        """
+        extract money from text
+        :return: Document
+        """
+        extractor = MoneyExtractor()
+        matches = extractor(self.text)
 
-def extract_money(text, doc):
+        for match in matches:
+            value = Money(match.fact.integer, match.fact.currency)
+            self.doc.money.add(value.value)
 
-    extractor = MoneyExtractor()
-    matches = extractor(text)
+        return self.doc
 
-    for match in matches:
-        value = MoneyInfo(match.fact.integer, match.fact.currency)
-        doc.money.add(value.value)
+    def extract_compare_money(self):
+        """
+        extract money from text and compare it with money from xml-file
+        """
+        self.doc = self.__extract_money__()
+        self.__compare_money_with_xml__()
 
-    return doc
+    def extract_compare_organizations(self):
+        """
+        extract organizations from text and compare them with organizations from xml-file
+        """
+        self.doc = self.__extract_organizations__()
+        self.__compare_organizations_with_xml__()
 
 
 def extract_address(text):
     # ADDRESS
     extractor = AddressExtractor()
     matches = extractor(text)
-    spans = [_.span for _ in matches]   # !
+    spans = [_.span for _ in matches]  # !
     address = text[spans[0][0]:spans[0][1]]
     print(address)

@@ -3,7 +3,7 @@ file with main named entities
 """
 
 
-class DocumentInfo:
+class Document:
 
     def __init__(self, doc_name):
         """
@@ -15,8 +15,16 @@ class DocumentInfo:
         self.company_client = None
         self.company_doer = None
 
+    def __str__(self):
+        print_string = "\nDocument: " + self.doc_name + "\n"
+        for company in self.companies:
+            print_string += "\tCompany: " + company + "\n"
+        for money in self.money:
+            print_string += "\tMoney: " + str(money) + "\n"
+        return print_string
 
-class CompanyInfo:
+
+class Company:
 
     def __init__(self, company):
         """
@@ -28,7 +36,7 @@ class CompanyInfo:
         self.person = None
 
 
-class MoneyInfo:
+class Money:
 
     def __init__(self, value, currency):
         """

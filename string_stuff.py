@@ -1,9 +1,17 @@
+"""
+Methods to work with strings
+"""
 import pymorphy2
 
 morph = pymorphy2.MorphAnalyzer()
 
 
 def replace_quotes_dashes(string):
+    """
+    delete all quotes and dashes from string
+    :param string: str string
+    :return: string without quotes and dashes
+    """
     if '»' in string or '«' or '"' or '\'' or '-' in string:
         string = string.replace('»', '')
         string = string.replace('«', '')

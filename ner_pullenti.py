@@ -5,7 +5,7 @@ from pullenti.ner.SourceOfAnalysis import SourceOfAnalysis
 from pullenti.ner.core.Termin import Termin
 from pullenti.ner.core.TerminCollection import TerminCollection
 
-from doc_info import CompanyInfo
+from doc_info import Company
 
 
 def extract_money_org(text, processor, doc):
@@ -30,8 +30,8 @@ def extract_main_info(text, processor, doc):
     empty_doer = True
     empty_person1 = True
     empty_person2 = True
-    company1 = CompanyInfo(None)
-    company2 = CompanyInfo(None)
+    company1 = Company(None)
+    company2 = Company(None)
 
     while token:
         tokens = new_client(token)
