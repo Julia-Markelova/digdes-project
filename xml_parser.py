@@ -1,6 +1,5 @@
 import xml.etree.cElementTree as eT
 from enum import Enum
-from doc_info import abbreviation, normal_form
 
 
 class TagNames(Enum):
@@ -20,6 +19,12 @@ class ExtractXML:
         self.money_tags = set()
 
     def get_value(self, tag_name):
+        """
+        extract info from xml-file
+        :param tag_name: type of value (TagName)
+        :return: true in success, false if no such type of value was founded
+        """
+        find = False
         try:
             tree = eT.ElementTree(file=self.filename)
             root = tree.getroot()
@@ -32,7 +37,6 @@ class ExtractXML:
             full_name = 'fullName'
             partner = 'supplierInfo'
 
-            i = False
             for child in root:
                 if 'body' in child.tag:
                     body = child.tag
@@ -50,27 +54,24 @@ class ExtractXML:
                                         self.money_tags.add(int(t.text))
                                 except ValueError:
                                     continue
-                                i = True
+                                find = True
                         elif tag_name == TagNames.ORGANISATION:
                             if short_name in t.tag:
                                 self.org_tags.add(t.text)
-                                i = True
+                                find = True
                             if full_name in t.tag:
                                 self.org_tags.add(t.text)
-                                i = True
+                                find = True
                         elif tag_name == TagNames.ADDRESS:
                             if address in t.tag:
-                                i = True
+                                find = True
                         elif tag_name == TagNames.PARTNER:
                             if partner in t.tag:
-                                print("partner: ", t.text)
-                                i = True
-
-                    if not i:
-                        pass
-                        # print("filename: " + self.filename)
-                        # print(root.findall('.//'))
-                        # print("-----------------------------NO-------"+tag_name.value+"----------------------")
+                                self.org_tags.add(t.text)
+                                find = True
 
         except IOError as e:
             print('\nERROR - cant find file: %s\n' % e)
+            return False
+
+        return find

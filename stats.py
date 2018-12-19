@@ -1,7 +1,15 @@
 """
 module to save different statistics
 """
-from doc_info import abbreviation, normal_form
+from functools import reduce
+
+from string_stuff import abbreviation, normal_form
+
+times = []
+precision_organization = []
+recall_organization = []
+precision_money = []
+recall_money = []
 
 
 def strict_include(xml_set, document_set):
@@ -55,3 +63,13 @@ def include_money(xml_set, document_set):
     :return: intersection of two sets
     """
     return xml_set & document_set
+
+
+def avg_count(list_of_values):
+    return reduce(lambda x, y: x + y, list_of_values) / len(list_of_values)
+
+
+def f_value(precision, recall):
+    return round(2 * precision * recall / (precision + recall) * 100, 2)
+
+
