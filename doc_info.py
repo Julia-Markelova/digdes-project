@@ -26,14 +26,20 @@ class Document:
 
 class Company:
 
-    def __init__(self, company):
+    def __init__(self):
         """
 
-        :param company: string name
         """
-        self.company = company
+        self.companies = set()
         self.address = None
         self.person = None
+
+    def __str__(self):
+        print_string = "\nCOMPANY:\n"
+        for company in self.companies:
+            print_string += "\tCompany: " + str(company) + "\n"
+        print_string += "\tPerson: " + str(self.person) + "\n"
+        return print_string
 
 
 class Money:

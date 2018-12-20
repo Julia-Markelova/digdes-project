@@ -6,6 +6,8 @@ import textract
 import os
 import re
 
+from xml_parser import ReturnValues
+
 
 class PlainText:
 
@@ -31,4 +33,7 @@ class PlainText:
                 self.xml_docs_map[xml_file] = os.path.join(self.sub_dir, file)
 
     def extract_doc_text(self, filename):
-        return textract.process(self.xml_docs_map[filename])
+        try:
+            return textract.process(self.xml_docs_map[filename])
+        except Exception:
+            return ReturnValues.ERROR

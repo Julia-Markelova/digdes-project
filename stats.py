@@ -17,6 +17,7 @@ empty_org_xml = 0
 empty_money_xml = 0
 match_org_xml_counter = 0
 match_money_xml_counter = 0
+strict_include_counter = 0
 
 
 def strict_include(xml_set, document_set):
@@ -78,7 +79,8 @@ def avg_round_count(list_of_values):
     :param list_of_values: list of digits
     :return: rounded average value
     """
-    return round(reduce(lambda x, y: x + y, list_of_values) / len(list_of_values), 2)
+    if list_of_values:
+        return round(reduce(lambda x, y: x + y, list_of_values) / len(list_of_values), 2)
 
 
 def avg_count(list_of_values):
@@ -87,7 +89,8 @@ def avg_count(list_of_values):
     :param list_of_values: list of digits
     :return: average value
     """
-    return reduce(lambda x, y: x + y, list_of_values) / len(list_of_values)
+    if list_of_values:
+        return reduce(lambda x, y: x + y, list_of_values) / len(list_of_values)
 
 
 def f_value(precision, recall):

@@ -4,10 +4,9 @@ from xml_parser import ExtractXML, TagNames, ReturnValues
 
 class Extractor:
 
-    def __init__(self, text, file, doc):
+    def __init__(self, text, doc):
         self.text = text
         self.doc = doc
-        self.file = file
 
     def __compare_money_with_xml__(self):
         """
@@ -45,6 +44,7 @@ class Extractor:
         is_not_empty_ = bool(union)
         if is_not_empty_:
             print("Strict matches:", union)
+            stats.strict_include_counter += 1
         union = stats.include(xml.org_tags, self.doc.companies)
         is_not_empty_ = bool(union)
         if is_not_empty_:

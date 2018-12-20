@@ -50,3 +50,14 @@ def abbreviation(string):
             return string.replace(key, word_abbr[key])
     else:
         return string
+
+
+def cut_text(text, begin, end):
+    """
+    cut given text from begin to end
+    :param text: string to cut
+    :param begin: int from
+    :param end: int to
+    :return: cut string
+    """
+    return text[begin:end]

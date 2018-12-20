@@ -97,6 +97,10 @@ ignore_arr = ['/home/yulia/Рабочий стол/digdes/Uploads/00b/aacda0c438
 
 class NatashaExtractor(Extractor):
 
+    def __init__(self, text, file, doc):
+        super().__init__(text, doc)
+        self.file = file
+
     def __extract_organizations__(self):
         """
         extract info about organisations from a text and save it to a Document.
