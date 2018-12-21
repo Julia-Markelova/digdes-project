@@ -8,6 +8,7 @@ from pullenti.ner.core.TerminCollection import TerminCollection
 from doc_info import Company
 from ner_stuff import Extractor
 from string_stuff import cut_text
+from xml_parser import ReturnValues
 
 companies = []
 
@@ -19,7 +20,10 @@ class PullentiExtractor(Extractor):
         self.processor = processor
 
     def extract_compare_money_org(self):
-        result = self.processor.process(SourceOfAnalysis(self.text))
+        try:
+            result = self.processor.process(SourceOfAnalysis(self.text))
+        except AttributeError or ValueError:
+            return ReturnValues.ERROR
 
         for entity in result.entities:
             self.doc.money.add(entity.value) if entity.type_name == 'MONEY' else None
@@ -28,6 +32,7 @@ class PullentiExtractor(Extractor):
                     self.doc.companies.add(str(name))
         self.__compare_organizations_with_xml__()
         self.__compare_money_with_xml__()
+        return ReturnValues.FOUND
 
     def extract_main_info(self):
         result = self.processor.process(SourceOfAnalysis(self.text))

@@ -68,10 +68,11 @@ for files in os.listdir(directory):
     # sub_dir = '/home/yulia/Рабочий стол/digdes/Uploads/00f'
 
     print("filename: " + sub_dir + "\n")
-
     doc_counter += 1
-
     p = PlainText(sub_dir)
+
+    if doc_counter < 4:
+        continue
 
     for file in p.xml_docs_map:
 
@@ -85,6 +86,7 @@ for files in os.listdir(directory):
             print("text parse error---------------------------------")
             file_counter -= 1
             continue
+
         # PULLENTI-WRAPPER
         # doc = Document(file)
         # wrapper_extractor(text, doc)
@@ -94,7 +96,10 @@ for files in os.listdir(directory):
         Processor([])
         processor = ProcessorService.create_processor()
         pullenti = PullentiExtractor(processor, text, doc)
-        pullenti.extract_compare_money_org()
+        ret = pullenti.extract_compare_money_org()
+        if ret == ReturnValues.ERROR:
+            file_counter -= 1
+            print("Attribute error----------------------------------------\n")
 
         # pullenti.extract_main_info()
         # for company in companies:

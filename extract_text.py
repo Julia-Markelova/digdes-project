@@ -34,6 +34,9 @@ class PlainText:
 
     def extract_doc_text(self, filename):
         try:
-            return textract.process(self.xml_docs_map[filename])
+            text = textract.process(self.xml_docs_map[filename])
+            if not text:
+                text = ReturnValues.ERROR
+            return text
         except Exception:
             return ReturnValues.ERROR
