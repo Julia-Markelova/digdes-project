@@ -1,5 +1,10 @@
 import xml.etree.cElementTree as eT
 from enum import Enum, auto
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
+                    format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 class TagNames(Enum):
@@ -49,7 +54,6 @@ class ExtractXML:
                     body = child.tag
 
                     for t in root.findall('./' + body + '//'):
-                        # print(t.tag, t.text)
                         if tag_name == TagNames.MONEY:
                             if money11 in t.tag or money22 in t.tag or money33 in t.tag:
                                 try:
@@ -78,7 +82,7 @@ class ExtractXML:
                                 return_value = ReturnValues.FOUND
 
         except IOError as e:
-            print('\nERROR - cant find file: %s\n' % e)
+            logging.WARN('\nERROR - cant find file: %s\n' % e)
             return_value = ReturnValues.ERROR
 
         return return_value

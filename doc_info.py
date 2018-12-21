@@ -26,11 +26,13 @@ class Document:
 
 class Company:
 
-    def __init__(self):
+    def __init__(self, file):
         """
 
         """
+        self.file = file
         self.companies = set()
+        self.company_names = set()  # compare with xml only by names
         self.address = None
         self.person = None
 

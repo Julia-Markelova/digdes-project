@@ -43,9 +43,11 @@ def include(xml_set, document_set):
     :return: set of founded elements
     """
     no_space_xml = set(map(lambda org_name:
-                           abbreviation(normal_form(org_name)).replace(" ", ""), xml_set))
+                           abbreviation(normal_form(org_name))
+                           .replace(" ", "").replace("-", ""), xml_set))
     no_space_doc = set(map(lambda org_name:
-                           abbreviation(normal_form(org_name)).replace(" ", ""), document_set))
+                           abbreviation(normal_form(org_name))
+                           .replace(" ", "").replace("-", ""), document_set))
     included_words_set = set()
 
     ignore_abbr = ['ао', 'оао', 'ооо', 'зао', 'сп', 'дюсш',
