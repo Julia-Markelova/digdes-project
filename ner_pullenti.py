@@ -1,7 +1,7 @@
 """
 Pullenti recognition is here
 """
-import logging
+import logging.config
 import sys
 
 from pullenti.ner.SourceOfAnalysis import SourceOfAnalysis
@@ -12,6 +12,11 @@ from doc_info import Company
 from ner_stuff import Extractor
 from string_stuff import cut_text
 from xml_parser import ReturnValues
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': True,
+})
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s")
@@ -31,7 +36,7 @@ class PullentiExtractor(Extractor):
         try:
             result = self.processor.process(SourceOfAnalysis(self.text))
         except AttributeError or ValueError:
-            logging.WARN("Failed to extract entities from file %s", self.doc.doc_name)
+            logging.warning("Failed to extract entities from file %s", self.doc.doc_name)
             return ReturnValues.ERROR
 
         for entity in result.entities:
@@ -80,8 +85,8 @@ class PullentiExtractor(Extractor):
                 company1.companies -= company2.companies
                 company2.companies -= company1.companies
 
-                logging.INFO("Found organization: \n%s", company1)
-                logging.INFO("Found organization-partner:\n%s", company2)
+                logging.info("Found organization: \n%s", company1)
+                logging.info("Found organization-partner:\n%s", company2)
 
                 self.__compare_organizations_with_xml__(
                     company1.company_names | company2.company_names)

@@ -1,7 +1,7 @@
 import datetime
 import os
-import logging
 import sys
+import logging.config
 
 from pullenti.ner.ProcessorService import ProcessorService
 from pullenti_wrapper.processor import Processor
@@ -13,6 +13,12 @@ from ner_natasha import NatashaExtractor, ignore_arr
 from ner_pullenti import PullentiExtractor
 from ner_pullenti_wrapper import wrapper_extractor
 from xml_parser import ReturnValues
+
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': True,
+})
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
@@ -73,9 +79,16 @@ def print_stats_organization():
                   ))
 
 
-directory = '/home/yulia/Рабочий стол/digdes/Uploads'
+if len(sys.argv) > 1:
+    directory = sys.argv[1]
+else:
+    logging.critical("No directory passed")
+    exit(1)
+
 file_counter = 0
-doc_counter = 0
+dir_counter = 0
+
+money = True
 
 start = datetime.datetime.now()
 
@@ -85,26 +98,22 @@ for files in os.listdir(directory):
     sub_dir = os.path.join(directory, files)
     p = PlainText(sub_dir)
 
-    logging.INFO("Directory %s № %d \n", sub_dir, doc_counter)
-    doc_counter += 1
+    logging.info("%d Directory %s\n", dir_counter, sub_dir)
+    dir_counter += 1
 
-    if doc_counter < 4:
+    if dir_counter < 5:
         continue
 
     for file in p.xml_docs_map:
 
         file_time = datetime.datetime.now()
 
-        logging.INFO("File %s № %d\n", file, file_counter)
+        logging.info("%d File %s", file_counter, file)
         file_counter += 1
-
-        #
-        # if file_counter < 53:
-        #     continue
 
         text = p.extract_doc_text(file)
         if text == ReturnValues.ERROR:
-            logging.WARN("Failed to parse text from file %s\n", file)
+            logging.warning("Failed to parse text from file %s", file)
             file_counter -= 1
             continue
         else:
@@ -123,9 +132,9 @@ for files in os.listdir(directory):
             ret = pullenti.extract_compare_money_org()
             if ret == ReturnValues.ERROR:
                 file_counter -= 1
-                logging.WARN("Failed to extract from %s\n", file)
+                logging.warning("Failed to extract from %s", file)
         except Exception as e:
-            logging.WARN("Failed to extract from %s because %s\n", file, e)
+            logging.warning("Failed to extract from %s because %s", file, e)
 
         # pullenti.extract_main_info()
         # money = False
@@ -137,18 +146,16 @@ for files in os.listdir(directory):
         #     natasha.extract_compare_money()
         #     natasha.extract_compare_organizations()
         # except Exception:
-        #     print("Natasha failed again\n")
+        #     logging.warning("Natasha failed again\n")
         #     file_counter -= 1
         #     continue
 
         stats.times.append((datetime.datetime.now() - file_time))
 
-    if doc_counter > 8:
+    if dir_counter > 8:
         break
 
     print_stats_organization()
-    # print_stats_money()
+    print_stats_money() if money else "No info about money"
 
 # file_counter -= len(ignore_arr)  # for NATASHA!
-
-print_stats_money()

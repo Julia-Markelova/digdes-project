@@ -1,7 +1,12 @@
 import xml.etree.cElementTree as eT
 from enum import Enum, auto
-import logging
+import logging.config
 import sys
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': True,
+})
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s")
@@ -82,7 +87,7 @@ class ExtractXML:
                                 return_value = ReturnValues.FOUND
 
         except IOError as e:
-            logging.WARN('\nERROR - cant find file: %s\n' % e)
+            logging.warning('\nERROR - cant find file: %s' % e)
             return_value = ReturnValues.ERROR
 
         return return_value

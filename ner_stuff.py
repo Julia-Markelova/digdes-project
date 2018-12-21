@@ -5,8 +5,14 @@ module consists of base-class for all extractors with default functions
 import stats
 from xml_parser import ExtractXML, TagNames, ReturnValues
 
-import logging
+import logging.config
 import sys
+
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': True,
+})
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s")
@@ -51,16 +57,16 @@ class Extractor:
         if organization == ReturnValues.ERROR:
             return ReturnValues.XML_NOT_FOUND
 
-        logging.INFO("Organizations from XML: %s", xml.org_tags)
+        logging.info("Organizations from XML: %s", xml.org_tags)
         union = stats.strict_include(xml.org_tags, organizations_set)
         is_not_empty_ = bool(union)
         if is_not_empty_:
-            logging.INFO("Found strict match: %s", union)
+            logging.info("Found strict match: %s", union)
             stats.strict_include_counter += 1
         union = stats.include(xml.org_tags, organizations_set)
         is_not_empty_ = bool(union)
         if is_not_empty_:
-            logging.INFO("All matches: %s", union)
+            logging.info("All matches: %s", union)
             stats.precision_organization.append(len(union) / len(organizations_set))
             stats.recall_organization.append(len(union) / len(xml.org_tags))
             return ReturnValues.FOUND
@@ -74,11 +80,11 @@ class Extractor:
         if money == ReturnValues.XML_NOT_FOUND or money == ReturnValues.ERROR:
             return money
 
-        logging.INFO("Money from XML: %s", xml.money_tags)
+        logging.info("Money from XML: %s", xml.money_tags)
         union = stats.include_money(xml.money_tags, self.doc.money)
         is_not_empty_ = bool(union)
         if is_not_empty_:
-            logging.INFO("Found money matched with xml: %s", union)
+            logging.info("Found money matched with xml: %s", union)
             stats.precision_money.append(len(union) / len(self.doc.money))
             stats.recall_money.append(len(union) / len(xml.money_tags))
             return ReturnValues.FOUND
