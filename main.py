@@ -98,11 +98,8 @@ for files in os.listdir(directory):
     sub_dir = os.path.join(directory, files)
     p = PlainText(sub_dir)
 
-    logging.info("%d Directory %s\n", dir_counter, sub_dir)
+    logging.info("%d Directory %s", dir_counter, sub_dir)
     dir_counter += 1
-
-    if dir_counter < 5:
-        continue
 
     for file in p.xml_docs_map:
 
@@ -127,17 +124,23 @@ for files in os.listdir(directory):
         doc = Document(file)
         Processor([])
         processor = ProcessorService.create_processor()
-        try:
-            pullenti = PullentiExtractor(processor, text, doc)
-            ret = pullenti.extract_compare_money_org()
-            if ret == ReturnValues.ERROR:
-                file_counter -= 1
-                logging.warning("Failed to extract from %s", file)
-        except Exception as e:
-            logging.warning("Failed to extract from %s because %s", file, e)
+        # try:
+        #     pullenti = PullentiExtractor(processor, text, doc)
+        #     ret = pullenti.extract_compare_money_org()
+        #     if ret == ReturnValues.ERROR:
+        #         file_counter -= 1
+        #         logging.warning("Failed to extract from %s", file)
+        # except Exception as e:
+        #     file_counter -= 1
+        #     logging.warning("Failed to extract from %s because %s", file, e)
 
-        # pullenti.extract_main_info()
-        # money = False
+        pullenti = PullentiExtractor(processor, text, doc)
+        try:
+            pullenti.extract_compare_main_info()
+            money = False
+        except Exception as e:
+            file_counter -= 1
+            logging.warning("Can not extract info from %s because %s", file, e)
 
         # NATASHA
         # doc = Document(file)
@@ -152,10 +155,8 @@ for files in os.listdir(directory):
 
         stats.times.append((datetime.datetime.now() - file_time))
 
-    if dir_counter > 8:
-        break
-
     print_stats_organization()
     print_stats_money() if money else "No info about money"
 
 # file_counter -= len(ignore_arr)  # for NATASHA!
+

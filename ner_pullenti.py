@@ -8,7 +8,7 @@ from pullenti.ner.SourceOfAnalysis import SourceOfAnalysis
 from pullenti.ner.core.Termin import Termin
 from pullenti.ner.core.TerminCollection import TerminCollection
 
-from doc_info import Company
+from doc_info import Company, CompanyContracts
 from ner_stuff import Extractor
 from string_stuff import cut_text
 from xml_parser import ReturnValues
@@ -20,6 +20,7 @@ logging.config.dictConfig({
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s")
+company_contracts = CompanyContracts()
 
 
 class PullentiExtractor(Extractor):
@@ -85,6 +86,8 @@ class PullentiExtractor(Extractor):
                 company1.companies -= company2.companies
                 company2.companies -= company1.companies
 
+                self.__fill_contracts_map__(company1, company2)
+
                 logging.info("Found organization: \n%s", company1)
                 logging.info("Found organization-partner:\n%s", company2)
 
@@ -94,6 +97,22 @@ class PullentiExtractor(Extractor):
                 break
 
             token = token.next0_
+
+    def __fill_contracts_map__(self, company1, company2):
+
+        comp1, comp2 = None, None
+
+        if bool(company1.companies):
+            comp1 = company1.companies.pop()
+            company1.companies.add(comp1)
+        if bool(company2.companies):
+            comp2 = company2.companies.pop()
+            company2.companies.add(comp2)
+
+        if comp1 and comp2:
+            company_contracts.add_contract(str(comp1), str(comp2))
+            company_contracts.add_contract(str(comp2), str(comp1))
+            company_contracts.save_to_json_file()
 
     def __fill_company__(self, begin, token, company1, company2):
 
@@ -157,7 +176,6 @@ class Client:
         client.add_variant("АГЕНТ")
         client.add_variant("ЗАЕМЩИК")
         client.add_variant("ПОЛЬЗОВАТЕЛЬ")
-        client.add_variant("СТОРОНЫ")
 
         term_collection.add(client)
 
@@ -190,7 +208,6 @@ class Executor:
         doer.add_variant("КРЕДИТОР")
         doer.add_variant("ОПЕРАТОР")
         doer.add_variant("CУБПОДРЯДЧИК")
-        doer.add_variant("СТОРОНЫ")
 
         term_collection.add(doer)
 

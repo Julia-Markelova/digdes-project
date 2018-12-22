@@ -1,6 +1,7 @@
 """
 file with main named entities
 """
+import json
 
 
 class Document:
@@ -44,13 +45,41 @@ class Company:
         return print_string
 
 
-class Money:
+class CompanyContracts:
 
-    def __init__(self, value, currency):
+    def __init__(self):
         """
+        contracts_map: {company: {company-partner: number of contracts}}
+        """
+        self.contracts_map = {}
 
-        :param value: int value
-        :param currency: string curr
-        """
-        self.value = value
-        self.currency = currency
+    def add_contract(self, company1, company2):
+        if company1 not in self.contracts_map.keys():
+            self.contracts_map[company1] = {}
+            self.contracts_map[company1][company2] = 1
+
+        elif company2 not in self.contracts_map[company1].keys():
+            self.contracts_map[company1][company2] = 1
+
+        else:
+            count = self.contracts_map[company1][company2]
+            self.contracts_map[company1][company2] = count + 1
+
+    def get_contracts(self, company):
+        return self.contracts_map[company]
+
+    def get_contracts_number_between(self, company1, company2):
+        if company1 in self.contracts_map.keys():
+            if company2 in self.contracts_map[company1].keys():
+                return self.contracts_map[company1][company2]
+        elif company2 in self.contracts_map.keys():
+            if company1 in self.contracts_map[company2].keys():
+                return self.contracts_map[company2][company1]
+
+    def save_to_json_file(self):
+        with open('contracts_map.json', 'w+', encoding='utf-8') as f:
+            json.dump(self.contracts_map, f, indent=4, ensure_ascii=False)
+
+    def load_from_json_file(self):
+        with open('contracts_map.json', 'r') as f:
+            self.contracts_map = json.load(f)
