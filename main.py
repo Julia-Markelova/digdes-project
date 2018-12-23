@@ -23,20 +23,18 @@ logging.config.dictConfig({
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s")
 
-extractor = 'natasha'
-
 
 def print_stats_money():
     print("\n\n---------------------MONEY-------------------------\n"
-          "summ: {0}\n"
-          "empty money: {1}, {2}%\n"
-          "empty xml money: {3}\n"
-          "in xml money: {4}, {5}%\n"
+          "total files: {0}\n"
+          "files without money extracted: {1}, {2}%\n"
+          "xml without money: {3}\n"
+          "extracted money matched with xml: {4}, {5}%\n"
           "precision money: {6}%\n"
           "recall money: {7}%\n"
           "f-value money: {8}%\n"
-          "time: {9}\n"
-          "avg time per file: {10}\n"
+          "total time: {9}\n"
+          "average time per file: {10}\n"
           .format(file_counter,
                   stats.empty_money_counter,
                   stats.empty_money_counter / file_counter * 100,
@@ -54,15 +52,15 @@ def print_stats_money():
 
 def print_stats_organization():
     print("\n\n----------------------ORGANIZATION------------------------\n"
-          "summ: {0}\nempty org: {1}, {2}%\n"
-          "empty xml org: {3}\n"
-          "in xml org: {4}, {5}%\n"
-          "in xml org strict {6}, {7}%\n"
-          "precision org: {8}%\n"
-          "recall org: {9}%\n"
-          "f-value org: {10}%\n"
-          "time: {11}\n"
-          "avg time per file: {12}\n"
+          "total files: {0}\nfiles without organizations extracted: {1}, {2}%\n"
+          "xml without organizations: {3}\n"
+          "organizations matched with xml: {4}, {5}%\n"
+          "organizations matched with xml strict {6}, {7}%\n"
+          "precision organization: {8}%\n"
+          "recall organization: {9}%\n"
+          "f-value organization: {10}%\n"
+          "total: {11}\n"
+          "average time per file: {12}\n"
           .format(file_counter,
                   stats.empty_org_counter,
                   stats.empty_org_counter / file_counter * 100,
@@ -126,39 +124,38 @@ def extract_organizations(processor_, text_, doc_, file_):
     return ReturnValues.FOUND
 
 
-parser = argparse.ArgumentParser(description='Extract organizations and money from texts')
-group = parser.add_mutually_exclusive_group()
-parser.add_argument('dir',
-                    help='directory with directories which contain doc/docx files with xml-files')
-group.add_argument('-e', '--extractor', nargs=1, help='name of extractor',
-                   choices=['pullenti', 'pullenti-wrapper', 'natasha'])
-group.add_argument('-oo', '--only_organizations', action='store_true',
-                   help='extract only organizations)')
+def parse_args():
+    extractor_ = 'natasha'
+    parser = argparse.ArgumentParser(description='Extract organizations and money from texts')
+    group = parser.add_mutually_exclusive_group()
+    parser.add_argument('dir',
+                        help='directory with directories which contain doc/docx files with xml-files')
+    group.add_argument('-e', '--extractor', nargs=1, help='name of extractor',
+                       choices=['pullenti', 'pullenti-wrapper', 'natasha'])
+    group.add_argument('-oo', '--only_organizations', action='store_true',
+                       help='extract only organizations)')
+    args = parser.parse_args()
+    if args.dir:
+        directory_ = str(args.dir)
+    if args.extractor:
+        extractor_ = str(args.extractor[0])
+    elif args.only_organizations:
+        extractor_ = 'oo'
+    return extractor_, directory_
 
-args = parser.parse_args()
-if args.dir:
-    directory = str(args.dir)
-    print(directory)
 
-if args.extractor:
-    extractor = str(args.extractor[0])
-    print(extractor)
-elif args.only_organizations:
-    extractor = 'oo'
-    print(extractor)
+extractor, directory = parse_args()
 
 file_counter = 0
 dir_counter = 0
 Processor([])
 processor = ProcessorService.create_processor()
 
-money = True
 
 start = datetime.datetime.now()
 
 for files in os.listdir(directory):
 
-    start_time = datetime.datetime.now()
     sub_dir = os.path.join(directory, files)
     p = PlainText(sub_dir)
     ret = 0

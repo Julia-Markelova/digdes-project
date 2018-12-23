@@ -37,6 +37,10 @@ class Extractor:
             stats.empty_money_counter += 1
 
     def __compare_organizations_with_xml__(self, organizations_set):
+        """
+        compare extracted organizations with the right value from xml-file and count stats
+        :param organizations_set: set of org_names, if None, doc.companies will be used
+        """
         if not organizations_set:
             organizations_set = self.doc.companies
         is_not_empty = bool(organizations_set)
@@ -48,6 +52,12 @@ class Extractor:
             stats.empty_org_counter += 1
 
     def __check_xml_org_match_and_print__(self, organizations_set):
+        """
+        check if extracted organizations are matched with organizations from xml-file,
+        log about processing, calculate stats
+        :param organizations_set: set of org_names, if None, doc.companies will be used
+        :return: one of the ReturnValues
+        """
         xml = ExtractXML(self.doc.doc_name)
         organization = xml.get_value(TagNames.ORGANISATION)
         partner = xml.get_value(TagNames.PARTNER)
@@ -74,6 +84,11 @@ class Extractor:
             return ReturnValues.NOT_FOUND
 
     def __check_match_xml_doc_money__(self):
+        """
+        check if extracted money are matched with money from xml-file,
+        log about processing, calculate stats
+        :return: one of the ReturnValues
+        """
         xml = ExtractXML(self.doc.doc_name)
         money = xml.get_value(TagNames.MONEY)
 

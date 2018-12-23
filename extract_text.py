@@ -45,6 +45,11 @@ class PlainText:
                 self.xml_docs_map[xml_file] = os.path.join(self.sub_dir, file)
 
     def extract_doc_text(self, filename):
+        """
+        extract text from doc/docx files
+        :param filename: file from which extract text
+        :return: str
+        """
         try:
             text = textract.process(self.xml_docs_map[filename])
             if not text:

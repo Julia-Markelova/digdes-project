@@ -6,6 +6,9 @@ from ner_stuff import Extractor
 class PullentiWrapperExtractor(Extractor):
 
     def wrapper_extract_compare_org_money(self):
+        """
+        extract money and organizations from the text and compare them with the xml-file
+        """
         processor = Processor([ORGANIZATION, MONEY])
         result = processor(self.text)
         for match in result.walk():

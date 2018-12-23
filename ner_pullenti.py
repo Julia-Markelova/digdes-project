@@ -106,7 +106,13 @@ class PullentiExtractor(Extractor):
             token = token.next0_
 
     def __fill_contracts_map__(self, companies1, companies2, file_name, company_contracts_obj):
-
+        """
+        add info about contract into contracts map of company contracts obj
+        :param companies1: set of first company names
+        :param companies2: set of second company names
+        :param file_name: file to save in json
+        :param company_contracts_obj: obj in which map save info
+        """
         comp1, comp2 = None, None
 
         if bool(companies1):
@@ -122,7 +128,15 @@ class PullentiExtractor(Extractor):
             company_contracts_obj.save_to_json_file(file_name)
 
     def __fill_company__(self, begin, token, company1, company2):
-
+        """
+        fill info about company (name, person)
+        :param begin: int - from which char cut text to extract info
+        :param token: founded token (client or executor), need to find int to which char cut text
+        :param company1: Company obj
+        :param company2: Company obj
+        :return: next begin (char of end token), company1 obj with names and person
+        and company2 obj with names and person if they were in the text-part
+        """
         part = cut_text(self.text, begin, token.end_char)
         company1 = self.__extract_client_doer__(part, company1)
         if bool(company2.companies) and not company2.person:
@@ -138,6 +152,12 @@ class PullentiExtractor(Extractor):
         return begin, company1, company2
 
     def __extract_client_doer__(self, part, company):
+        """
+        extract company names from part of the text
+        :param part: part of the text
+        :param company: company obj to fill in the names
+        :return: company obj with names if they were in the text-part
+        """
         result = self.processor.process(SourceOfAnalysis(part))
 
         for entity in result.entities:
@@ -149,6 +169,12 @@ class PullentiExtractor(Extractor):
         return company
 
     def __extract_persons__(self, part, company):
+        """
+        extract persons from part of the text
+        :param part: part of the text
+        :param company: company obj
+        :return: company obj with persons if they were in the text-part
+        """
         result = self.processor.process(SourceOfAnalysis(part))
         for entity in result.entities:
             if entity.type_name == 'PERSON':
