@@ -76,10 +76,10 @@ class CompanyContracts:
             if company1 in self.contracts_map[company2].keys():
                 return self.contracts_map[company2][company1]
 
-    def save_to_json_file(self):
-        with open('contracts_map.json', 'w+', encoding='utf-8') as f:
+    def save_to_json_file(self, file_name):
+        with open(file_name, 'w+', encoding='utf-8') as f:
             json.dump(self.contracts_map, f, indent=4, ensure_ascii=False)
 
-    def load_from_json_file(self):
-        with open('contracts_map.json', 'r') as f:
+    def load_from_json_file(self, file_name):
+        with open(file_name, 'r') as f:
             self.contracts_map = json.load(f)

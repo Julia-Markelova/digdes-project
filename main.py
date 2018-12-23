@@ -2,6 +2,7 @@ import datetime
 import os
 import sys
 import logging.config
+import argparse
 
 from pullenti.ner.ProcessorService import ProcessorService
 from pullenti_wrapper.processor import Processor
@@ -9,20 +10,20 @@ from pullenti_wrapper.processor import Processor
 import stats
 from doc_info import Document
 from extract_text import PlainText
-from ner_natasha import NatashaExtractor, ignore_arr
+from ner_natasha import NatashaExtractor
 from ner_pullenti import PullentiExtractor
-from ner_pullenti_wrapper import wrapper_extractor
+from ner_pullenti_wrapper import PullentiWrapperExtractor
 from xml_parser import ReturnValues
-
 
 logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': True,
 })
 
-
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s")
+
+extractor = 'natasha'
 
 
 def print_stats_money():
@@ -79,14 +80,77 @@ def print_stats_organization():
                   ))
 
 
-if len(sys.argv) > 1:
-    directory = sys.argv[1]
-else:
-    logging.critical("No directory passed")
-    exit(1)
+def extract_natasha(file_, text_, doc_):
+    # NATASHA
+    natasha = NatashaExtractor(text_, file_, doc_)
+    try:
+        natasha.extract_compare_money()
+        natasha.extract_compare_organizations()
+    except Exception as e:
+        logging.warning("Natasha failed because %s", e)
+        return ReturnValues.ERROR
+    return ReturnValues.FOUND
+
+
+def extract_pullenti(file_, text_, doc_, processor_):
+
+    try:
+        pullenti = PullentiExtractor(processor_, text_, doc_)
+        ret_ = pullenti.extract_compare_money_org()
+        if ret_ == ReturnValues.ERROR:
+            logging.warning("Failed to extract from %s", file_)
+            return ReturnValues.ERROR
+    except Exception as e:
+        logging.warning("Failed to extract from %s because %s", file_, e)
+        return ReturnValues.ERROR
+    return ReturnValues.FOUND
+
+
+def extract_wrapper(text_, doc_, file_):
+    try:
+        pullenti_wrapper = PullentiWrapperExtractor(text_, doc_)
+        pullenti_wrapper.wrapper_extract_compare_org_money()
+    except Exception as e:
+        logging.warning("Pullenti wrapper failed at %s because %s", file_, e)
+        return ReturnValues.ERROR
+    return ReturnValues.FOUND
+
+
+def extract_organizations(processor_, text_, doc_, file_):
+    pullenti = PullentiExtractor(processor_, text_, doc_)
+    try:
+        pullenti.extract_compare_main_info()
+    except Exception as e:
+        logging.warning("Can not extract info from %s because %s", file_, e)
+        return ReturnValues.ERROR
+    return ReturnValues.FOUND
+
+
+parser = argparse.ArgumentParser(description='Extract organizations and money from texts')
+group = parser.add_mutually_exclusive_group()
+parser.add_argument('dir',
+                    help='directory with directories which contain doc/docx files with xml-files')
+group.add_argument('-e', '--extractor', nargs=1, help='name of extractor',
+                   choices=['pullenti', 'pullenti-wrapper', 'natasha'])
+group.add_argument('-oo', '--only_organizations', action='store_true',
+                   help='extract only organizations)')
+
+args = parser.parse_args()
+if args.dir:
+    directory = str(args.dir)
+    print(directory)
+
+if args.extractor:
+    extractor = str(args.extractor[0])
+    print(extractor)
+elif args.only_organizations:
+    extractor = 'oo'
+    print(extractor)
 
 file_counter = 0
 dir_counter = 0
+Processor([])
+processor = ProcessorService.create_processor()
 
 money = True
 
@@ -97,6 +161,7 @@ for files in os.listdir(directory):
     start_time = datetime.datetime.now()
     sub_dir = os.path.join(directory, files)
     p = PlainText(sub_dir)
+    ret = 0
 
     logging.info("%d Directory %s", dir_counter, sub_dir)
     dir_counter += 1
@@ -116,47 +181,25 @@ for files in os.listdir(directory):
         else:
             text = text.decode('utf-8')
 
-        # PULLENTI-WRAPPER
-        # doc = Document(file)
-        # wrapper_extractor(text, doc)
-
-        # PULLENTI
         doc = Document(file)
-        Processor([])
-        processor = ProcessorService.create_processor()
-        # try:
-        #     pullenti = PullentiExtractor(processor, text, doc)
-        #     ret = pullenti.extract_compare_money_org()
-        #     if ret == ReturnValues.ERROR:
-        #         file_counter -= 1
-        #         logging.warning("Failed to extract from %s", file)
-        # except Exception as e:
-        #     file_counter -= 1
-        #     logging.warning("Failed to extract from %s because %s", file, e)
 
-        pullenti = PullentiExtractor(processor, text, doc)
-        try:
-            pullenti.extract_compare_main_info()
-            money = False
-        except Exception as e:
+        if extractor == 'pullenti-wrapper':
+            ret = extract_wrapper(text, doc, file)
+        elif extractor == 'natasha':
+            ret = extract_natasha(file, text, doc)
+        elif extractor == 'pullenti':
+            ret = extract_pullenti(file, text, doc, processor)
+        elif extractor == 'oo':
+            ret = extract_organizations(processor, text, doc, file)
+
+        if ret == ReturnValues.ERROR:
             file_counter -= 1
-            logging.warning("Can not extract info from %s because %s", file, e)
-
-        # NATASHA
-        # doc = Document(file)
-        # natasha = NatashaExtractor(text, file, doc)
-        # try:
-        #     natasha.extract_compare_money()
-        #     natasha.extract_compare_organizations()
-        # except Exception:
-        #     logging.warning("Natasha failed again\n")
-        #     file_counter -= 1
-        #     continue
+            continue
 
         stats.times.append((datetime.datetime.now() - file_time))
 
     print_stats_organization()
-    print_stats_money() if money else "No info about money"
-
-# file_counter -= len(ignore_arr)  # for NATASHA!
-
+    try:
+        print_stats_money()
+    except Exception:
+        pass

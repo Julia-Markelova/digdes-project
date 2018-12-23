@@ -1,29 +1,21 @@
-from pullenti_wrapper.processor import (
-    Processor,
-    DATE,
-    GEO,
-    ORGANIZATION,
-    PERSON,
-    MONEY,
-    ADDRESS
-)
+from pullenti_wrapper.processor import Processor, ORGANIZATION, MONEY
+
+from ner_stuff import Extractor
 
 
-def wrapper_extractor(text, doc):
-    processor = Processor([PERSON, ORGANIZATION, GEO, DATE, MONEY])
-    result = processor(text)
-    for match in result.walk():
-        if match.referent.label == 'ORGANIZATION':
-            # try:
-            #     first = [value for key, value in match.referent.slots if key == 'TYPE'][0]
-            #     last = [value for key, value in match.referent.slots if key == 'NAME'][0]
-            #     doc.companies.add(str(first + ' ' + last))
-            # except IndexError:
-            #     pass
-            for slot in match.referent.slots:
-                if slot.key == 'NAME':
-                    doc.companies.add(str(slot.value))
-        if match.referent.label == 'MONEY':
-            for slot in match.referent.slots:
-                if slot.key == 'VALUE':
-                    doc.money.add(int(slot.value))
+class PullentiWrapperExtractor(Extractor):
+
+    def wrapper_extract_compare_org_money(self):
+        processor = Processor([ORGANIZATION, MONEY])
+        result = processor(self.text)
+        for match in result.walk():
+            if match.referent.label == 'ORGANIZATION':
+                for slot in match.referent.slots:
+                    if slot.key == 'NAME':
+                        self.doc.companies.add(str(slot.value))
+            if match.referent.label == 'MONEY':
+                for slot in match.referent.slots:
+                    if slot.key == 'VALUE':
+                        self.doc.money.add(int(slot.value))
+        self.__compare_organizations_with_xml__(None)
+        self.__compare_money_with_xml__()

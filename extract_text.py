@@ -5,8 +5,20 @@ Extract plain text from doc/docx
 import textract
 import os
 import re
+import logging.config
+import sys
 
 from xml_parser import ReturnValues
+
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': True,
+})
+
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
+                    format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 class PlainText:
@@ -38,5 +50,6 @@ class PlainText:
             if not text:
                 text = ReturnValues.ERROR
             return text
-        except Exception:
+        except Exception as e:
+            logging.warning("Failed to extract text from %s because %s", filename, e)
             return ReturnValues.ERROR

@@ -20,7 +20,9 @@ logging.config.dictConfig({
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s")
+
 company_contracts = CompanyContracts()
+company_contracts_names = CompanyContracts()
 
 
 class PullentiExtractor(Extractor):
@@ -85,8 +87,13 @@ class PullentiExtractor(Extractor):
                 # remove equals
                 company1.companies -= company2.companies
                 company2.companies -= company1.companies
+                company1.company_names -= company2.company_names
+                company1.company_names -= company2.company_names
 
-                self.__fill_contracts_map__(company1, company2)
+                self.__fill_contracts_map__(company1.companies, company2.companies,
+                                            'contracts_map.json', company_contracts)
+                self.__fill_contracts_map__(company1.company_names, company2.company_names,
+                                            'contracts_map_names.json', company_contracts_names)
 
                 logging.info("Found organization: \n%s", company1)
                 logging.info("Found organization-partner:\n%s", company2)
@@ -98,21 +105,21 @@ class PullentiExtractor(Extractor):
 
             token = token.next0_
 
-    def __fill_contracts_map__(self, company1, company2):
+    def __fill_contracts_map__(self, companies1, companies2, file_name, company_contracts_obj):
 
         comp1, comp2 = None, None
 
-        if bool(company1.companies):
-            comp1 = company1.companies.pop()
-            company1.companies.add(comp1)
-        if bool(company2.companies):
-            comp2 = company2.companies.pop()
-            company2.companies.add(comp2)
+        if bool(companies1):
+            comp1 = companies1.pop()
+            companies1.add(comp1)
+        if bool(companies2):
+            comp2 = companies2.pop()
+            companies2.add(comp2)
 
         if comp1 and comp2:
-            company_contracts.add_contract(str(comp1), str(comp2))
-            company_contracts.add_contract(str(comp2), str(comp1))
-            company_contracts.save_to_json_file()
+            company_contracts_obj.add_contract(str(comp1), str(comp2))
+            company_contracts_obj.add_contract(str(comp2), str(comp1))
+            company_contracts_obj.save_to_json_file(file_name)
 
     def __fill_company__(self, begin, token, company1, company2):
 
@@ -133,8 +140,6 @@ class PullentiExtractor(Extractor):
     def __extract_client_doer__(self, part, company):
         result = self.processor.process(SourceOfAnalysis(part))
 
-        # TODO: remove print
-        print(part, "\n")
         for entity in result.entities:
             if entity.type_name == 'ORGANIZATION':
                 company.companies.add(str(entity))

@@ -1,8 +1,7 @@
 """
 here is natasha named entity recognition
 """
-from doc_info import *
-from natasha import AddressExtractor, OrganisationExtractor, MoneyExtractor
+from natasha import OrganisationExtractor, MoneyExtractor
 from ner_stuff import Extractor
 
 ignore_arr = ['/home/yulia/Рабочий стол/digdes/Uploads/00b/aacda0c43805abdb599b7ce50cb33.xml',
@@ -127,8 +126,7 @@ class NatashaExtractor(Extractor):
         matches = extractor(self.text)
 
         for match in matches:
-            value = Money(match.fact.integer, match.fact.currency)
-            self.doc.money.add(value.value)
+            self.doc.money.add(match.fact.integer)
 
         return self.doc
 
@@ -144,14 +142,4 @@ class NatashaExtractor(Extractor):
         extract organizations from text and compare them with organizations from xml-file
         """
         self.doc = self.__extract_organizations__()
-        self.__compare_organizations_with_xml__()
-
-
-def extract_address(text):
-    # ADDRESS
-    extractor = AddressExtractor()
-    matches = extractor(text)
-    spans = [_.span for _ in matches]  # !
-    address = text[spans[0][0]:spans[0][1]]
-    # TODO: remove print
-    print(address)
+        self.__compare_organizations_with_xml__(None)
